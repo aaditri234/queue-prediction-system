@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-Based Queue Prediction System | Case Study</title>
+<meta name="description" content="Software engineering case study: an AI-based queue prediction system for government service centres. PCCOE, 2026-2027.">
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--text:#1d2433;--muted:#5b657a;--accent:#2563eb;--accent2:#0ea5a4;--line:#e3e7ef;--soft:#eef3ff}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1420;--card:#171e2e;--text:#e6eaf3;--muted:#9aa5bb;--accent:#6ea0ff;--accent2:#3dd6d0;--line:#27314a;--soft:#1b2540}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+a{color:var(--accent)}
+header.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 20px}
+header.top img{width:34px;height:34px}
+header.top strong{font-size:.95rem}
+header.top .dl{font-size:.85rem;text-decoration:none;background:var(--accent);color:#fff;padding:6px 14px;border-radius:999px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#0e7490);color:#fff;padding:64px 20px 56px;text-align:center}
+.hero .tag{letter-spacing:.15em;font-size:.75rem;opacity:.8;text-transform:uppercase}
+.hero h1{font-size:clamp(1.9rem,5vw,3rem);margin:.4em 0 .3em;line-height:1.15}
+.hero p{max-width:640px;margin:0 auto;opacity:.92}
+.authors{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:28px}
+.authors div{background:rgba(255,255,255,.12);border-radius:12px;padding:10px 18px;font-size:.9rem}
+.authors span{display:block;opacity:.75;font-size:.78rem}
+.meta{margin-top:22px;font-size:.88rem;opacity:.85}
+.layout{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:230px 1fr;gap:32px;padding:32px 20px}
+nav.toc{position:sticky;top:76px;align-self:start;font-size:.88rem}
+nav.toc a{display:block;padding:6px 10px;border-left:2px solid var(--line);color:var(--muted);text-decoration:none}
+nav.toc a:hover,nav.toc a.active{color:var(--accent);border-color:var(--accent);background:var(--soft)}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-bottom:24px}
+h2{margin:0 0 .6em;font-size:1.5rem}
+h2 .n{color:var(--accent);margin-right:6px}
+h3{margin:1.4em 0 .4em;font-size:1.05rem;color:var(--accent)}
+ul{padding-left:1.2em}li{margin:.25em 0}
+.tablewrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+tr.hl td{background:var(--soft);font-weight:600}
+figure{margin:18px 0;text-align:center}
+figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:zoom-in}
+figcaption{font-size:.85rem;color:var(--muted);margin-top:8px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pill{background:var(--soft);color:var(--accent);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:14px 0}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.box b{display:block;margin-bottom:4px}
+.usecase{border-left:4px solid var(--accent2);padding-left:16px;margin:16px 0}
+.ver{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.ver div{flex:1 1 180px;border-radius:12px;padding:12px 14px;background:var(--soft)}
+.ver b{color:var(--accent)}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.lightbox.on{display:flex}.lightbox img{max-width:100%;max-height:100%;background:#fff;border-radius:8px}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 20px 50px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}nav.toc{display:none}section{padding:20px 18px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <img src="logo.png" alt="PCCOE logo">
+  <strong>AI-Based Queue Prediction System</strong>
+  <a class="dl" style="margin-left:auto;margin-right:8px" href="index.html">Open app</a><a class="dl" style="margin-left:0" href="report.docx" download>Download report</a>
+</header>
+
+<div class="hero">
+  <div class="tag">A Case Study Report &middot; Software Engineering</div>
+  <h1>AI-Based Queue Prediction System</h1>
+  <p>Predicting waiting time and congestion at government service centres, so citizens can plan visits and staff can manage counters better.</p>
+  <div class="authors">
+    <div>Aaditri Hrishikesh Bhujbal<span>PRN 125B1E245</span></div>
+    <div>Disha Dinesh Swami<span>PRN 125B1E247</span></div>
+  </div>
+  <div class="meta">Guided by <b>Dr. Amruta Mahajan</b> &middot; Second Year Sem-I &middot; Pimpri Chinchwad College of Engineering, 2026-2027</div>
+</div>
+
+<div class="layout">
+<nav class="toc" id="toc">
+  <a href="#intro">1. Introduction</a>
+  <a href="#problem">2. Problem &amp; Solution</a>
+  <a href="#sdlc">3. SDLC Model</a>
+  <a href="#requirements">4. Requirements</a>
+  <a href="#srs">5. SRS</a>
+  <a href="#usecases">6. Use Cases</a>
+  <a href="#uml">7. UML Diagrams</a>
+  <a href="#agile">8. Agile Practices</a>
+  <a href="#outcomes">9. Outcomes &amp; Scope</a>
+  <a href="#conclusion">10. Conclusion</a>
+  <a href="#references">11. References</a>
+  <a href="#appendix">12. Appendix</a>
+</nav>
+
+<main>
+
+<section id="intro">
+<h2><span class="n">1.</span>Introduction</h2>
+<h3>1.1 Background of the Selected Problem</h3>
+<p>Government service centres deliver everyday services to citizens, such as certificates, licences, identity documents and utility services. These centres often see heavy and uneven footfall. Citizens arrive without knowing how long they will wait, queues grow at peak hours, waiting areas become overcrowded, and some counters sit idle while others are overloaded. Today, most centres have no software that tells citizens or staff how long a visit is likely to take.</p>
+<h3>1.2 Purpose and Scope</h3>
+<p>The <b>AI-Based Queue Prediction System</b> shows the current queue status, estimates waiting time, predicts congestion, and helps citizens plan their visits. It also helps staff and administrators manage counters.</p>
+<div class="grid3">
+  <div class="box"><b>In scope</b>Queue status display, waiting-time estimation, congestion prediction, visit planning and notifications, counter management and reports.</div>
+  <div class="box"><b>Outside scope</b>Processing of service applications, payments and document verification. The system supports queue management only; it does not deliver the government service itself.</div>
+</div>
+<h3>1.3 Intended Users and Application Domain</h3>
+<p>The domain is the government service centre environment: citizens, service counters, staff, administrators, queue records (arrivals, service times, counter logs) and waiting-time information. Queue records flow into the prediction system, which produces waiting-time information for citizens, staff and administrators.</p>
+<div class="grid3">
+  <div class="box"><b>Citizens</b>Check queue status and estimated waiting time before and during a visit.</div>
+  <div class="box"><b>Staff</b>Update queue length and counter availability.</div>
+  <div class="box"><b>Administrators</b>Manage counters, monitor performance and view reports.</div>
+</div>
+</section>
+
+<section id="problem">
+<h2><span class="n">2.</span>Problem Statement and Proposed Solution</h2>
+<h3>2.1 Existing Problem and Limitations</h3>
+<ul>
+  <li><b>Long queues:</b> citizens spend long periods waiting at counters.</li>
+  <li><b>Uncertain waiting times:</b> there is no reliable estimate of how long a visit will take.</li>
+  <li><b>Overcrowding:</b> waiting areas become congested at busy times.</li>
+  <li><b>Inefficient counter allocation:</b> counters are not matched to current demand.</li>
+  <li><b>Peak-hour demand:</b> sudden rushes are hard to anticipate and manage.</li>
+</ul>
+<p>As a result, citizens lose time and face uncertainty, staff handle uneven workloads, and administrators lack data to plan counters.</p>
+<h3>2.2 Proposed Software Solution</h3>
+<p>A web/mobile software system that records live queue data, uses past queue records (arrival patterns and service times) to predict waiting time and congestion, and shows the results to citizens, staff and administrators. Staff update queue length and counter status; the system refreshes its prediction automatically and sends notifications when waiting times change.</p>
+<h3>2.3 Objectives and Expected Benefits</h3>
+<ul>
+  <li>Display current queue status.</li><li>Estimate waiting times.</li><li>Identify possible congestion.</li><li>Help citizens plan their visits.</li><li>Support staff and administrators in managing counters.</li>
+</ul>
+<p><b>Expected benefits:</b> less time lost by citizens, clearer expectations, less crowding in waiting areas, better use of counters and data-based planning by administrators.</p>
+</section>
+
+<section id="sdlc">
+<h2><span class="n">3.</span>Selection of SDLC Model</h2>
+<h3>3.1 Selected Model: Evolutionary Model</h3>
+<p>The software is built as a first working version, deployed for use, tested, improved using feedback, and then released again as a better version. The cycle repeats until the product meets user needs.</p>
+<figure><img src="fig1-sdlc.png" alt="Evolutionary SDLC model applied to the case study"><figcaption>Figure 1: Evolutionary SDLC model applied to the case study</figcaption></figure>
+<p>The loop repeats until prediction accuracy and functionality meet user needs. The case study evolves in three versions:</p>
+<div class="ver">
+  <div><b>V1</b><br>Basic queue status and wait estimate</div>
+  <div><b>V2</b><br>Notifications</div>
+  <div><b>V3</b><br>Higher accuracy and congestion forecasting</div>
+</div>
+<h3>3.2 Justification for Selecting the Model</h3>
+<div class="tablewrap"><table>
+<tr><th>Model</th><th>Reason for comparison</th><th>Suitability</th></tr>
+<tr><td>Waterfall</td><td>Sequential phases; requirements fixed early; feedback arrives late</td><td>Not suitable: queue patterns and user needs are not fully known at the start</td></tr>
+<tr><td>Incremental</td><td>Planned parts delivered in turn; scope defined upfront; each part built once</td><td>Partly suitable: parts are not revisited and refined</td></tr>
+<tr><td>Agile</td><td>Short sprints, continuous collaboration</td><td>Needs constant user involvement, which is difficult with citizens as users</td></tr>
+<tr class="hl"><td>Evolutionary (selected)</td><td>Versions evolve in repeated cycles; testing and feedback drive refinement</td><td>Best fit: prediction accuracy improves as real queue data and feedback are collected</td></tr>
+</table></div>
+<p>The prediction part of the system depends on real data. Its accuracy cannot be fixed at the design stage and has to be improved version by version, which matches the Evolutionary approach. The model also fits changing queue patterns, such as new peak hours or new services.</p>
+<h3>3.3 Major Phases</h3>
+<ul>
+  <li><b>Develop version:</b> build the current version (for V1: queue status and basic wait estimate).</li>
+  <li><b>Deploy for use:</b> release it at a service centre.</li>
+  <li><b>Test and collect feedback:</b> verify updates and predictions against observed queues; collect feedback from citizens, staff and administrators.</li>
+  <li><b>Refine and improve:</b> correct problems, retrain the prediction model, add features, and begin the next version.</li>
+</ul>
+</section>
+
+<section id="requirements">
+<h2><span class="n">4.</span>Requirements Analysis</h2>
+<h3>4.1 Stakeholders and Requirements-Gathering Approach</h3>
+<div class="tablewrap"><table>
+<tr><th>Stakeholder</th><th>Interest in the system</th></tr>
+<tr><td>Citizens</td><td>Check queue status and estimated waiting time</td></tr>
+<tr><td>Staff</td><td>Update queue length and counter availability</td></tr>
+<tr><td>Administrators</td><td>Manage counters and view reports</td></tr>
+</table></div>
+<p><b>Elicitation techniques:</b></p>
+<ul>
+  <li><b>Interviews:</b> discuss needs with staff and administrators.</li>
+  <li><b>Observation:</b> watch real queue flow and counter operation.</li>
+  <li><b>Questionnaires:</b> collect citizens' waiting concerns and preferences.</li>
+  <li><b>Record analysis:</b> study existing queue records for arrival and service patterns.</li>
+</ul>
+<h3>4.2 Functional Requirements</h3>
+<div class="tablewrap"><table>
+<tr><th>ID</th><th>Requirement</th><th>Description</th></tr>
+<tr><td>FR1</td><td>View queue status</td><td>Show live queue length per service centre</td></tr>
+<tr><td>FR2</td><td>Estimate waiting time</td><td>Show expected wait for the selected service</td></tr>
+<tr><td>FR3</td><td>Predict congestion</td><td>Flag busy periods and peak hours</td></tr>
+<tr><td>FR4</td><td>Update counter status</td><td>Staff set counter availability and queue length</td></tr>
+<tr><td>FR5</td><td>Send notifications</td><td>Alert citizens about wait changes</td></tr>
+<tr><td>FR6</td><td>Generate reports</td><td>Provide queue and counter performance summaries</td></tr>
+</table></div>
+<h3>4.3 Non-Functional Requirements</h3>
+<div class="tablewrap"><table>
+<tr><th>Attribute</th><th>Requirement</th></tr>
+<tr><td>Usability</td><td>Simple, easy-to-use interface</td></tr>
+<tr><td>Performance</td><td>Fast updates and responses</td></tr>
+<tr><td>Reliability</td><td>Consistent, available estimates</td></tr>
+<tr><td>Security</td><td>Role-based access and data protection</td></tr>
+<tr><td>Scalability</td><td>Supports more centres and users</td></tr>
+</table></div>
+</section>
+
+<section id="srs">
+<h2><span class="n">5.</span>Software Requirements Specification (SRS)</h2>
+<h3>5.1 Purpose and Scope</h3>
+<p>This SRS describes a system that predicts waiting time and congestion at government service centres. It serves citizens, staff and administrators. Application processing, payments and document verification are excluded.</p>
+<h3>5.2 Intended Users and Major Features</h3>
+<ul>
+  <li><b>Citizens:</b> view queue and estimated wait; receive notifications.</li>
+  <li><b>Staff:</b> update queue and counters.</li>
+  <li><b>Administrators:</b> manage counters and view reports.</li>
+</ul>
+<div class="pills"><span class="pill">Queue status display</span><span class="pill">Waiting-time estimate</span><span class="pill">Congestion prediction</span><span class="pill">Counter updates</span><span class="pill">Notifications</span><span class="pill">Reports</span></div>
+<h3>5.3 System Requirements</h3>
+<ul>
+  <li><b>Functional:</b> FR1 to FR6 as listed in Section 4.2.</li>
+  <li><b>Non-functional:</b> usability, performance, reliability, security and scalability as listed in Section 4.3.</li>
+  <li><b>External interfaces:</b> a web/mobile user interface; a database and a prediction module as software interfaces; communication over HTTPS with notifications sent to users.</li>
+</ul>
+<h3>5.4 Assumptions and Constraints</h3>
+<ul>
+  <li>Staff keep queue data current.</li>
+  <li>Estimates are not guarantees.</li>
+  <li>Prediction quality depends on the quality of queue records.</li>
+</ul>
+</section>
+
+<section id="usecases">
+<h2><span class="n">6.</span>Usage Scenario / Use Case Description</h2>
+<div class="usecase">
+<h3>6.1 Use Case 1: Check Estimated Waiting Time</h3>
+<p><b>Actor:</b> Citizen<br><b>Preconditions:</b> the citizen has access to the web/mobile app; the selected service centre has queue data available.</p>
+<ol>
+  <li>The citizen selects a service centre.</li>
+  <li>The system displays the current queue status.</li>
+  <li>The system shows the estimated waiting time for the selected service.</li>
+  <li>The citizen decides when to visit, and may choose to receive notifications.</li>
+</ol>
+<p><b>Expected outcome:</b> the citizen knows the likely wait and plans the visit, avoiding unnecessary waiting.<br><b>Alternate flow:</b> if current data is not available, the system uses the last known data to predict the waiting time.</p>
+</div>
+<div class="usecase">
+<h3>6.2 Use Case 2: Update Queue Status</h3>
+<p><b>Actor:</b> Staff<br><b>Preconditions:</b> the staff member is logged in with a staff role.</p>
+<ol>
+  <li>Staff update the queue length.</li>
+  <li>Staff update counter availability.</li>
+  <li>The system refreshes the prediction using this latest data.</li>
+</ol>
+<p><b>Expected outcome:</b> citizens see updated waiting-time estimates, and queue data becomes available to the administrator for monitoring.</p>
+</div>
+<div class="usecase">
+<h3>6.3 Use Case 3: Monitor and Manage Counters</h3>
+<p><b>Actor:</b> Administrator<br><b>Preconditions:</b> the administrator is logged in; queue data has been recorded.<br><b>Steps:</b> monitor service performance, view reports, manage counter allocation.<br><b>Expected outcome:</b> counters are matched to expected demand.</p>
+</div>
+</section>
+
+<section id="uml">
+<h2><span class="n">7.</span>UML Diagrams</h2>
+<p style="color:var(--muted);font-size:.9rem">Click any diagram to enlarge.</p>
+<h3>7.1 Use Case Diagram</h3>
+<figure><img src="fig2-usecase.png" alt="UML use case diagram"><figcaption>Figure 2: UML Use Case Diagram</figcaption></figure>
+<p>The system boundary is the AI-Based Queue Prediction System. The <b>Citizen</b> is linked to View Queue Status, Check Estimated Waiting Time and Receive Notification. The <b>Staff</b> member is linked to Update Queue Status. The <b>Administrator</b> is linked to Manage Counters and View Reports.</p>
+<h3>7.2 Class Diagram</h3>
+<figure><img src="fig3-class.png" alt="UML class diagram"><figcaption>Figure 3: UML Class Diagram</figcaption></figure>
+<p>Citizen views a Queue. A Queue has Counters. The PredictionEngine reads the Queue and creates Notifications, which are sent to the Citizen. An Administrator manages Counters.</p>
+<div class="tablewrap"><table>
+<tr><th>Class</th><th>Attributes</th><th>Methods</th></tr>
+<tr><td>Citizen</td><td>citizenId, name</td><td>viewQueue()</td></tr>
+<tr><td>Queue</td><td>queueId, length, waitTime</td><td>updateLength()</td></tr>
+<tr><td>Counter</td><td>counterId, status</td><td>setStatus()</td></tr>
+<tr><td>PredictionEngine</td><td>model, trainingData</td><td>predictWait(), forecastLoad()</td></tr>
+<tr><td>Notification</td><td>message, sentTime</td><td>send()</td></tr>
+<tr><td>Administrator</td><td>adminId</td><td>manage(), viewReports()</td></tr>
+</table></div>
+<h3>7.3 Activity Diagram</h3>
+<figure><img src="fig4-activity.png" alt="UML activity diagram: predict waiting time"><figcaption>Figure 4: UML Activity Diagram &ndash; Predict Waiting Time</figcaption></figure>
+<p>The flow starts when the user selects a service centre. The system fetches queue data. If data is available, it predicts the waiting time; if not, it uses the last known data. The result is then displayed and the flow ends.</p>
+<h3>7.4 Deployment Diagram</h3>
+<figure><img src="fig5-deployment.png" alt="UML deployment diagram"><figcaption>Figure 5: UML Deployment Diagram</figcaption></figure>
+<p>The Citizen Device runs the web/mobile app and connects over HTTPS to the Application Server, which hosts the Prediction Module. The Application Server connects through SQL to the Database Server that stores the queue records.</p>
+</section>
+
+<section id="agile">
+<h2><span class="n">8.</span>Applicability of Agile Practices</h2>
+<h3>8.1 Suitability of Agile</h3>
+<p>User feedback after each cycle can directly improve the interface, the notifications and the prediction accuracy. Requirements such as notification timing or report content are likely to change once staff and citizens use the system. Small, frequent releases also fit the Evolutionary model chosen in Section 3, since both depend on repeated cycles with feedback.</p>
+<h3>8.2 Selected Approach: Scrum</h3>
+<ul>
+  <li><b>Scrum roles:</b> Product Owner (represents the service centre administration and citizens' needs), Scrum Master, Development Team.</li>
+  <li><b>Scrum events:</b> Sprint Planning, Daily Scrum, Sprint Review and Sprint Retrospective.</li>
+  <li>Practices from Extreme Programming (XP), such as continuous testing and refactoring, are used alongside Scrum to keep the prediction module reliable.</li>
+</ul>
+<h3>8.3 Example Product Backlog Items</h3>
+<div class="tablewrap"><table>
+<tr><th>Priority</th><th>Backlog item</th><th>Version</th></tr>
+<tr><td>1</td><td>As a citizen, I want to view live queue status so that I can see how crowded a centre is</td><td>V1</td></tr>
+<tr><td>2</td><td>As a citizen, I want to see the estimated waiting time for my service</td><td>V1</td></tr>
+<tr><td>3</td><td>As staff, I want to update queue length and counter availability quickly</td><td>V1</td></tr>
+<tr><td>4</td><td>As a citizen, I want to receive notifications when waiting time changes</td><td>V2</td></tr>
+<tr><td>5</td><td>As an administrator, I want reports on queue and counter performance</td><td>V2</td></tr>
+<tr><td>6</td><td>As an administrator, I want congestion forecasts for peak hours</td><td>V3</td></tr>
+</table></div>
+<h3>8.4 Iterative Development and Feedback</h3>
+<p>Each sprint produces a working increment. At the Sprint Review, staff and administrators try the increment, and a sample of citizens give feedback through short questionnaires. Predicted waiting times are compared with observed waiting times, and the differences are reviewed in the Retrospective. The findings are added to the product backlog and the prediction model is refined in the next sprint.</p>
+</section>
+
+<section id="outcomes">
+<h2><span class="n">9.</span>Expected Outcomes, Limitations and Future Scope</h2>
+<div class="grid3">
+  <div class="box"><b>Expected benefits</b><ul><li>Clearer waiting times for citizens</li><li>Better counter use and balanced staff workloads</li><li>Less overcrowding in waiting areas</li><li>Reports that help administrators plan counters</li></ul></div>
+  <div class="box"><b>Limitations</b><ul><li>Estimates depend on data quality; they are not guarantees</li><li>Staff must update queue data on time</li><li>Invalid or missing data must be handled without breaking the system</li><li>Testing must cover updates, predictions, notifications and error handling</li></ul></div>
+  <div class="box"><b>Future enhancements</b><ul><li>Dedicated mobile app</li><li>SMS alerts for citizens without smartphones</li><li>Appointment booking</li></ul></div>
+</div>
+</section>
+
+<section id="conclusion">
+<h2><span class="n">10.</span>Conclusion</h2>
+<p>The proposed AI-Based Queue Prediction System addresses long queues, uncertain waiting times and inefficient counter allocation at government service centres by predicting waiting time and congestion and sharing it with citizens, staff and administrators. Software engineering concepts support its development: requirement analysis and the SRS define what the system must do; modular design (queue, prediction, notification and report modules) makes it easier to build and maintain; the Evolutionary model lets the system improve through repeated cycles; UML diagrams document the design; testing validates the system against real scenarios; and Agile Scrum practices bring in user feedback after every cycle. Together these help reduce waiting uncertainty at government service centres.</p>
+</section>
+
+<section id="references">
+<h2><span class="n">11.</span>References</h2>
+<ul>
+  <li>Theory lecture notes.</li>
+  <li>R. S. Pressman and B. R. Maxim, <i>Software Engineering: A Practitioner's Approach</i>, McGraw-Hill.</li>
+  <li>I. Sommerville, <i>Software Engineering</i>, Pearson.</li>
+  <li>K. Schwaber and J. Sutherland, <i>The Scrum Guide</i> (scrumguides.org).</li>
+</ul>
+</section>
+
+<section id="appendix">
+<h2><span class="n">12.</span>Appendix</h2>
+<h3>Appendix A: Consistency Summary</h3>
+<div class="tablewrap"><table>
+<tr><th>Element</th><th>Used in this report</th></tr>
+<tr><td>Case study</td><td>AI-Based Queue Prediction System for government service centres</td></tr>
+<tr><td>SDLC model</td><td>Evolutionary (V1 &rarr; V2 &rarr; V3)</td></tr>
+<tr><td>Agile approach</td><td>Scrum, with XP practices</td></tr>
+<tr><td>UML diagrams</td><td>Use case, class, activity, deployment</td></tr>
+<tr><td>Work products</td><td>SRS, architecture and design, UML diagrams, test cases and reports, user documentation, maintenance records</td></tr>
+</table></div>
+</section>
+
+</main>
+</div>
+
+<footer>Department of Computer Engineering &middot; Pimpri Chinchwad College of Engineering &middot; 2026-2027</footer>
+<div class="lightbox" id="lb"><img alt=""></div>
+
+<script>
+const lb=document.getElementById('lb'),lbi=lb.querySelector('img');
+document.querySelectorAll('figure img').forEach(i=>i.addEventListener('click',()=>{lbi.src=i.src;lb.classList.add('on')}));
+lb.addEventListener('click',()=>lb.classList.remove('on'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')lb.classList.remove('on')});
+const links=[...document.querySelectorAll('#toc a')];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-30% 0px -60% 0px'});
+document.querySelectorAll('section[id]').forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

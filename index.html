@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueueSense | AI-Based Queue Prediction System</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1b2233;--muted:#667189;--line:#e2e6f0;--accent:#2563eb;--soft:#eaf0ff;--low:#16a34a;--med:#d97706;--high:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#0e131f;--card:#161d2d;--text:#e7ebf5;--muted:#9aa6bd;--line:#273049;--accent:#6ea0ff;--soft:#1b2644;--low:#34d399;--med:#fbbf24;--high:#f87171}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.bar{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:1.1rem}.brand span{color:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+button,select,input{font:inherit}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--text);padding:6px 14px;border-radius:999px;cursor:pointer}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tiny{font-size:.8rem;color:var(--muted)}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+h2{margin:0 0 10px;font-size:1.15rem}h3{margin:0 0 8px;font-size:1rem}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1 1 200px}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:3px}
+select,input[type=number],input[type=password]{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:600}
+.btn.ghost{background:var(--soft);color:var(--accent)}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+.btn.red{background:var(--high)}
+.big{font-size:3.4rem;font-weight:800;line-height:1}
+.badge{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:.85rem;color:#fff}
+.low{background:var(--low)}.med{background:var(--med)}.high{background:var(--high)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--bg);border-radius:10px;padding:10px 12px}.stat b{display:block;font-size:1.3rem}
+.warn{background:#fef3c7;color:#92400e;border-radius:10px;padding:8px 12px;margin-top:12px;font-size:.88rem}
+.chart{display:flex;align-items:flex-end;gap:8px;height:170px;margin-top:10px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.col i{width:100%;border-radius:6px 6px 0 0;display:block}
+.col small{font-size:.7rem;color:var(--muted);margin-top:3px}
+.col .v{font-size:.72rem;font-weight:700;margin-bottom:2px}
+.col.now small{color:var(--accent);font-weight:800}
+.tip{background:var(--soft);border-radius:10px;padding:10px 14px;margin-top:12px;font-size:.92rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.counters{display:flex;gap:8px;flex-wrap:wrap}
+.ctr{border-radius:10px;padding:10px 14px;border:1px solid var(--line);min-width:120px}
+.ctr.open{border-color:var(--low)}.ctr.closed{opacity:.7}
+.qctl{display:flex;align-items:center;gap:14px;margin:8px 0}
+.qctl .big{min-width:90px;text-align:center}
+.qctl button{width:48px;height:48px;font-size:1.5rem;border-radius:50%}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:12px;display:none;z-index:50;max-width:90%}
+ul.n{list-style:none;padding:0;margin:0}ul.n li{padding:6px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="brand">Queue<span>Sense</span></div>
+  <span class="tiny">AI-Based Queue Prediction System</span>
+  <div class="tabs" id="tabs"></div>
+</div></header>
+<main id="app"></main>
+<div id="toast"></div>
+
+<script>
+const KEY='queuesense_v1';
+const HOURS=[9,10,11,12,13,14,15,16,17];
+const PROFILE={9:.4,10:.75,11:.95,12:.7,13:.5,14:.8,15:.9,16:.65,17:.35}; // share of a centre's peak arrivals per hour
+const SERVICES={'Certificates':1,'Licences':1.3,'ID documents':1.1,'Utility services':.8}; // service-time multiplier
+const PINS={staff:'1234',admin:'4321'};
+
+/* ---------- data ---------- */
+function mkCounters(n,closed){return Array.from({length:n},(_,i)=>({id:i+1,status:i<closed?'closed':'open'}))}
+function defaults(){
+  const now=Date.now();
+  const S={sim:true,notifs:[],watches:[],log:[],centres:[
+    {id:'c1',name:'Pimpri Tehsil Office',peak:34,svc:7,queue:5,counters:mkCounters(4,0),updated:now},
+    {id:'c2',name:'RTO Pimpri-Chinchwad',peak:16,svc:10,queue:7,counters:mkCounters(3,0),updated:now},
+    {id:'c3',name:'Aadhaar Seva Kendra',peak:22,svc:8,queue:14,counters:mkCounters(4,1),updated:now}
+  ]};
+  S.centres.forEach(c=>{for(let i=30;i>0;i--){const q=Math.max(0,Math.round(c.queue+(Math.random()-.5)*8));S.log.push({t:now-i*240000,c:c.id,q,w:Math.round(q*c.svc/Math.max(1,open(c)))})}});
+  return S;
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.centres)return s}catch(e){}return defaults()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- prediction ---------- */
+function open(c){return c.counters.filter(x=>x.status==='open').length}
+function waitNow(c,m){const o=open(c);return o?Math.round(c.queue*c.svc*(m||1)/o):null}
+function forecast(c,m){
+  const o=open(c);
+  return HOURS.map(h=>{
+    if(!o)return{h,w:90};
+    const rho=c.peak*PROFILE[h]/(o*60/(c.svc*m));
+    const w=rho>=1?90:Math.min(90,c.svc*m*Math.pow(rho,Math.sqrt(2*(o+1)))/(o*(1-rho)));
+    return{h,w:Math.round(w)};
+  });
+}
+function lvl(w){return w===null?['Closed','high']:w<15?['Low','low']:w<30?['Medium','med']:['High','high']}
+
+/* ---------- state ---------- */
+let S=load();
+let ui={tab:'citizen',cid:S.centres[0].id,svc:'Certificates',scid:S.centres[0].id,thr:15,
+  staff:sessionStorage.getItem('qs_staff')==='1',admin:sessionStorage.getItem('qs_admin')==='1',err:''};
+const C=id=>S.centres.find(c=>c.id===id);
+const $=id=>document.getElementById(id);
+const hh=h=>String(h).padStart(2,'0')+':00';
+function ago(t){const m=Math.floor((Date.now()-t)/60000);return m<1?'just now':m+' min ago'}
+
+/* ---------- actions ---------- */
+function setTab(t){ui.tab=t;ui.err='';render()}
+function setCentre(v){ui.cid=v;render()}
+function setSvc(v){ui.svc=v;render()}
+function setStaffCentre(v){ui.scid=v;render()}
+function setThr(v){ui.thr=Math.max(1,parseInt(v)||15)}
+function toggleSim(){S.sim=!S.sim;save();render()}
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',5000)}
+function logEntry(c){const o=open(c);S.log.push({t:Date.now(),c:c.id,q:c.queue,w:o?Math.round(c.queue*c.svc/o):90});if(S.log.length>400)S.log.shift()}
+function touch(c){c.updated=Date.now();c.manual=Date.now()+90000;logEntry(c);save();checkWatches();render()}
+function notify(msg){
+  S.notifs.unshift({t:Date.now(),m:msg});S.notifs=S.notifs.slice(0,8);toast(msg);
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification('QueueSense',{body:msg})}catch(e){}
+}
+function addWatch(){
+  S.watches.push({cid:ui.cid,svc:ui.svc,thr:ui.thr});save();
+  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}
+  checkWatches();render();
+}
+function rmWatch(i){S.watches.splice(i,1);save();render()}
+function checkWatches(){
+  S.watches=S.watches.filter(w=>{
+    const c=C(w.cid),wt=c?waitNow(c,SERVICES[w.svc]):null;
+    if(wt!==null&&wt<=w.thr){notify(c.name+': wait for '+w.svc+' is now about '+wt+' min');return false}
+    return true;
+  });save();
+}
+function login(role){
+  if($('pin').value===PINS[role]){ui[role]=true;sessionStorage.setItem('qs_'+role,'1');ui.err=''}else ui.err='Wrong PIN';
+  render();
+}
+function logout(role){ui[role]=false;sessionStorage.removeItem('qs_'+role);render()}
+function adj(d){const c=C(ui.scid);c.queue=Math.max(0,Math.min(99,c.queue+d));touch(c)}
+function serve(){
+  const c=C(ui.scid);if(c.queue>0)c.queue--;
+  const v=parseFloat($('smp')&&$('smp').value);
+  if(v>0)c.svc=Math.round((c.svc*.8+v*.2)*10)/10; // smoothing: the model learns from observed service time
+  touch(c);
+}
+function toggleCounter(cid,id){const c=C(cid),k=c.counters.find(x=>x.id===id);k.status=k.status==='open'?'closed':'open';touch(c)}
+function addCounter(cid){const c=C(cid);c.counters.push({id:Math.max(0,...c.counters.map(k=>k.id))+1,status:'open'});touch(c)}
+function removeCounter(cid){const c=C(cid);if(c.counters.length>1){c.counters.pop();touch(c)}}
+function resetAll(){if(confirm('Reset all demo data?')){S=defaults();save();render()}}
+function exportCsv(){
+  const rows=['time,centre,queue_length,wait_min'].concat(S.log.map(l=>[new Date(l.t).toISOString(),C(l.c).name,l.q,l.w].join(',')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='queue-report.csv';a.click();
+}
+
+/* ---------- simulation (stands in for real queue feeds) ---------- */
+function tick(){
+  if(!S.sim)return;const now=Date.now();
+  const h=Math.min(17,Math.max(9,new Date().getHours()));
+  S.centres.forEach(c=>{
+    if(c.manual&&c.manual>now)return;
+    const target=Math.round(c.peak*PROFILE[h]*.6);
+    c.queue=Math.max(0,Math.min(60,c.queue+Math.round((target-c.queue)*.25+(Math.random()-.5)*4)));
+    c.updated=now;logEntry(c);
+  });
+  save();checkWatches();
+  const a=document.activeElement;
+  if(!(a&&(a.tagName==='SELECT'||a.tagName==='INPUT')))render();
+}
+setInterval(tick,6000);
+window.addEventListener('storage',e=>{if(e.key===KEY){S=load();render()}});
+
+/* ---------- views ---------- */
+function citizen(){
+  const c=C(ui.cid),m=SERVICES[ui.svc],w=waitNow(c,m),[lv,cl]=lvl(w),f=forecast(c,m);
+  const stale=Date.now()-c.updated>30*60000;
+  const nowH=new Date().getHours();
+  let cand=f.filter(x=>x.h>=nowH);const tomorrow=!cand.length;if(tomorrow)cand=f;
+  const best=cand.reduce((a,b)=>b.w<a.w?b:a),peak=f.reduce((a,b)=>b.w>a.w?b:a);
+  const bars=f.map(x=>{const k=lvl(x.w)[1];return `<div class="col ${x.h===nowH?'now':''}"><span class="v">${x.w>=90?'90+':x.w}</span><i class="${k}" style="height:${Math.max(4,Math.min(100,x.w/60*100))}%"></i><small>${x.h}</small></div>`}).join('');
+  const ws=S.watches.map((x,i)=>`<li>${C(x.cid).name} · ${x.svc} · notify at ≤ ${x.thr} min <button class="btn sm ghost" onclick="rmWatch(${i})">Remove</button></li>`).join('')||'<li class="tiny">No alerts set.</li>';
+  const ns=S.notifs.map(n=>`<li>${n.m}<div class="tiny">${ago(n.t)}</div></li>`).join('')||'<li class="tiny">No notifications yet.</li>';
+  return `<div class="card"><div class="row">
+    <div><label>Service centre</label><select onchange="setCentre(this.value)">${S.centres.map(x=>`<option value="${x.id}" ${x.id===ui.cid?'selected':''}>${x.name}</option>`).join('')}</select></div>
+    <div><label>Service</label><select onchange="setSvc(this.value)">${Object.keys(SERVICES).map(x=>`<option ${x===ui.svc?'selected':''}>${x}</option>`).join('')}</select></div></div></div>
+  <div class="card"><h2>Estimated waiting time</h2>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="big">${w===null?'--':w}<span style="font-size:1.1rem;font-weight:600"> min</span></div><span class="badge ${cl}">${w===null?'No counter open':lv+' congestion'}</span></div>
+    <div class="stats"><div class="stat"><b>${c.queue}</b>people in queue</div><div class="stat"><b>${open(c)} / ${c.counters.length}</b>counters open</div><div class="stat"><b>${ago(c.updated)}</b>last update</div></div>
+    ${stale?'<div class="warn">Live data is not available right now. The estimate uses the last known data.</div>':''}
+    <p class="tiny" style="margin-bottom:0">Estimate = people in queue × average service time ÷ open counters. Estimates are not guarantees.</p></div>
+  <div class="card"><h2>Predicted waiting time by hour (min)</h2><div class="chart">${bars}</div>
+    <div class="tip">Best time to visit${tomorrow?' tomorrow':''}: <b>${hh(best.h)}</b> (about ${best.w>=90?'90+':best.w} min). Busiest expected hour: <b>${hh(peak.h)}</b>.</div></div>
+  <div class="card"><h2>Notify me</h2><div class="row"><div><label>Alert me when wait is at most (min)</label><input type="number" min="1" value="${ui.thr}" onchange="setThr(this.value)"></div>
+    <div style="display:flex;align-items:flex-end"><button class="btn" onclick="addWatch()">Set alert</button></div></div>
+    <ul class="n" style="margin-top:10px">${ws}</ul><h3 style="margin-top:14px">Notifications</h3><ul class="n">${ns}</ul></div>`;
+}
+function gate(role,label,pin){
+  return `<div class="card" style="max-width:380px"><h2>${label} login</h2><label>PIN</label><input id="pin" type="password" placeholder="Enter PIN" onkeydown="if(event.key==='Enter')login('${role}')">
+  <p class="tiny">Demo PIN: ${pin}</p>${ui.err?`<div class="warn">${ui.err}</div>`:''}<button class="btn" onclick="login('${role}')">Log in</button></div>`;
+}
+function staff(){
+  if(!ui.staff)return gate('staff','Staff','1234');
+  const c=C(ui.scid),w=waitNow(c,1),[lv,cl]=lvl(w);
+  const ctr=c.counters.map(k=>`<div class="ctr ${k.status}"><b>Counter ${k.id}</b><div class="tiny">${k.status==='open'?'Open':'Closed'}</div><button class="btn sm ghost" onclick="toggleCounter('${c.id}',${k.id})">${k.status==='open'?'Close':'Open'}</button></div>`).join('');
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Staff panel</h2><button class="btn sm ghost" onclick="logout('staff')">Log out</button></div>
+    <label style="margin-top:12px">Service centre</label><select onchange="setStaffCentre(this.value)">${S.centres.map(x=>`<option value="${x.id}" ${x.id===ui.scid?'selected':''}>${x.name}</option>`).join('')}</select></div>
+  <div class="card"><h3>Queue length</h3><div class="qctl"><button class="btn ghost" onclick="adj(-1)">−</button><div class="big">${c.queue}</div><button class="btn" onclick="adj(1)">+</button></div>
+    <div class="row" style="align-items:flex-end;margin-top:8px"><div><label>Last service took (min, optional – teaches the model)</label><input id="smp" type="number" min="1" placeholder="e.g. 9"></div><div><button class="btn" onclick="serve()">Serve next token</button></div></div>
+    <p class="tiny">Average service time now: <b>${c.svc} min</b>. Current estimate: <b>${w===null?'--':w+' min'}</b> <span class="badge ${cl}">${lv}</span></p></div>
+  <div class="card"><h3>Counter availability</h3><div class="counters">${ctr}</div></div>`;
+}
+function admin(){
+  if(!ui.admin)return gate('admin','Administrator','4321');
+  const rows=S.centres.map(c=>{
+    const w=waitNow(c,1),[lv,cl]=lvl(w),f=forecast(c,1),pk=f.reduce((a,b)=>b.w>a.w?b:a);
+    const L=S.log.filter(l=>l.c===c.id),avg=L.length?Math.round(L.reduce((s,l)=>s+l.w,0)/L.length):0,mx=L.length?Math.max(...L.map(l=>l.w)):0;
+    const closed=c.counters.length-open(c);
+    const tip=pk.w>=30?(closed?`Open a closed counter before ${hh(pk.h)} (predicted wait ${pk.w>=90?'90+':pk.w} min).`:`Add a counter or extra staff around ${hh(pk.h)} (predicted wait ${pk.w>=90?'90+':pk.w} min).`):'Current counters are enough for the day.';
+    return `<tr><td><b>${c.name}</b></td><td>${c.queue}</td><td>${open(c)}/${c.counters.length}</td><td>${w===null?'--':w+' min'} <span class="badge ${cl}">${lv}</span></td><td>${avg} / ${mx}</td>
+      <td><button class="btn sm ghost" onclick="addCounter('${c.id}')">+ Counter</button> <button class="btn sm ghost" onclick="removeCounter('${c.id}')">− Counter</button></td></tr>
+      <tr><td colspan="6" class="tiny">Suggestion: ${tip}</td></tr>`;
+  }).join('');
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><h2 style="margin:0">Administrator dashboard</h2><button class="btn sm ghost" onclick="logout('admin')">Log out</button></div>
+    <div style="overflow-x:auto;margin-top:10px"><table><tr><th>Centre</th><th>Queue</th><th>Counters</th><th>Wait now</th><th>Avg / max wait</th><th>Manage</th></tr>${rows}</table></div></div>
+  <div class="card"><h2>Reports</h2><p class="tiny">${S.log.length} queue records collected. Averages above are calculated from these records.</p>
+    <button class="btn" onclick="exportCsv()">Download report (CSV)</button> <button class="btn red" onclick="resetAll()">Reset demo data</button></div>`;
+}
+function render(){
+  $('tabs').innerHTML=[['citizen','Citizen'],['staff','Staff'],['admin','Admin']].map(t=>`<button class="tab ${ui.tab===t[0]?'on':''}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join('')
+    +`<button class="tab" onclick="toggleSim()" title="Simulates live queue changes">Live demo: ${S.sim?'On':'Off'}</button><a class="tab" style="text-decoration:none" href="report.html">Project report</a>`;
+  $('app').innerHTML=ui.tab==='citizen'?citizen():ui.tab==='staff'?staff():admin();
+}
+checkWatches();render();
+</script>
+</body>
+</html>
